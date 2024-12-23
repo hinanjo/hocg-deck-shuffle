@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deck Shuffle App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>hocg deck shuffle</h1>
+  <p>Enter the deck ID and the number of shuffle outputs to display.</p>
+  <label for="deck-id">Deck ID:</label>
+  <input type="text" id="deck-id" placeholder="e.g., 2NZ15">
+  <br>
+  <label for="output-count">Number of Outputs (1-10):</label>
+  <input type="number" id="output-count" value="3" min="1" max="10">
+  <br>
+  <button id="fetch-deck">Fetch and Shuffle</button>
+
+  <div id="result"></div>
+
+  <script>
+    async function fetchDeckData(deckId) {
+      const apiUrl = `https://decklog.bushiroad.com/system/app/api/view/${deckId}`;
+      const headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        "Dnt": "1"
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: headers,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error(error);
+        alert("Failed to fetch deck data. Please check the deck ID.");
+        return null;
+      }
+    }
+
+    function shuffleDeck(list, subList) {
+      const mainDeck = [];
+      list.forEach(card => {
+        for (let i = 0; i < card.num; i++) {
+          mainDeck.push(card);
+        }
+      });
+      const subDeck = [];
+      subList.forEach(card => {
+        for (let i = 0; i < card.num; i++) {
+          subDeck.push(card);
+        }
+      });
+
+      mainDeck.sort(() => Math.random() - 0.5);
+      subDeck.sort(() => Math.random() - 0.5);
+
+      return { mainDeck: mainDeck.slice(0, 7), subDeck: subDeck.slice(0, 1) };
+    }
+
+    function displayResults(shuffledResults) {
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = ""; // Clear previous results
+
+      shuffledResults.forEach((result, index) => {
+        const mainDeckHtml = result.mainDeck.map(card => `<li>${card.name} (${card.card_number})</li>`).join("");
+        const subDeckHtml = result.subDeck.map(card => `<li>${card.name} (${card.card_number})</li>`).join("");
+
+        resultDiv.innerHTML += `
+          <div>
+            <h3>Result ${index + 1}</h3>
+            <strong>Main Deck:</strong>
+            <ul>${mainDeckHtml}</ul>
+            <strong>Sub Deck:</strong>
+            <ul>${subDeckHtml}</ul>
+          </div>
+          <hr>
+        `;
+      });
+    }
+
+    document.getElementById("fetch-deck").addEventListener("click", async () => {
+      const deckId = document.getElementById("deck-id").value.trim();
+      const outputCount = parseInt(document.getElementById("output-count").value, 10);
+
+      if (!deckId) {
+        alert("Please enter a valid deck ID.");
+        return;
+      }
+
+      if (isNaN(outputCount) || outputCount < 1 || outputCount > 10) {
+        alert("Please enter a number between 1 and 10.");
+        return;
+      }
+
+      const deckData = await fetchDeckData(deckId);
+      if (!deckData) {
+        return;
+      }
+
+      const results = [];
+      for (let i = 0; i < outputCount; i++) {
+        results.push(shuffleDeck(deckData.list, deckData.sub_list));
+      }
+
+      displayResults(results);
+    });
+  </script>
+</body>
+</html>
