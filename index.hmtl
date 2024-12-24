@@ -57,14 +57,17 @@
 
   <script>
     async function fetchDeckData(deckId) {
-      const apiUrl = `https://decklog.bushiroad.com/system/app/api/view/${deckId}`;
+      // CORS Anywhere のプロキシサーバーを使用
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const apiUrl = `${proxyUrl}https://decklog.bushiroad.com/system/app/api/view/${deckId}`;
+      
       const headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0...",
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json",
         "Dnt": "1"
       };
-
+    
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
