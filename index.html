@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deck Shuffle App</title>
+  <title>Advanced Deck Shuffle App</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,20 +11,30 @@
       line-height: 1.6;
       max-width: 800px;
       margin: auto;
+      background-color: #f5f5f5;
     }
-    input, button {
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    input, button, select {
       padding: 10px;
       font-size: 16px;
       margin: 10px 0;
       display: block;
       width: 100%;
       box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
     button {
       background-color: #007BFF;
       color: white;
       border: none;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
     button:hover {
       background-color: #0056b3;
@@ -32,34 +42,97 @@
     #result {
       margin-top: 20px;
       padding: 10px;
-      border: 1px solid #ccc;
-      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fff;
+    }
+    .shuffle-options {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
     }
     .card-list {
       margin: 10px 0;
       padding: 10px;
       background: #fff;
       border-radius: 4px;
+      border-left: 4px solid #007BFF;
+    }
+    .key-cards {
+      margin: 10px 0;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .key-cards label {
+      display: block;
+      margin: 5px 0;
+    }
+    .option-group {
+      margin-bottom: 15px;
+    }
+    .option-label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <h1>Deck Shuffle App</h1>
-  <p>デッキコードを入力してシャッフル結果を確認してください。</p>
-  
-  <div>
-    <label for="deck-id">デッキコードを入力してください（例: 2NZ15）:</label>
-    <input type="text" id="deck-id" placeholder="例: 2NZ15">
-  </div>
-  
-  <div>
-    <label for="output-count">出力する結果の数（1-10）:</label>
-    <input type="number" id="output-count" value="3" min="1" max="10">
-  </div>
+  <div class="container">
+    <h1>Advanced Deck Shuffle App</h1>
+    <p>デッキコードを入力し、シャッフルオプションを選択してください。</p>
+    
+    <div class="option-group">
+      <label class="option-label" for="deck-id">デッキコード（例: 2NZ15）:</label>
+      <input type="text" id="deck-id" placeholder="例: 2NZ15">
+    </div>
+    
+    <div class="option-group">
+      <label class="option-label" for="output-count">出力する結果の数（1-10）:</label>
+      <input type="number" id="output-count" value="3" min="1" max="10">
+    </div>
 
-  <button onclick="handleShuffle()">デッキをシャッフル</button>
+    <div class="shuffle-options">
+      <div class="option-group">
+        <label class="option-label" for="shuffle-type">シャッフル強度:</label>
+        <select id="shuffle-type">
+          <option value="normal">通常シャッフル</option>
+          <option value="soft">ソフトシャッフル（緩め）</option>
+          <option value="intensive">インテンシブシャッフル（強め）</option>
+        </select>
+      </div>
 
-  <div id="result"></div>
+      <div class="option-group">
+        <label class="option-label" for="shuffle-pattern">シャッフルパターン:</label>
+        <select id="shuffle-pattern">
+          <option value="fisher-yates">ランダムシャッフル（Fisher-Yates）</option>
+          <option value="riffle">リップルシャッフル</option>
+          <option value="hindu">ヒンドゥーシャッフル</option>
+          <option value="faro">ファロシャッフル</option>
+        </select>
+      </div>
+
+      <div class="key-cards">
+        <label>
+          <input type="checkbox" id="ensure-key-cards">
+          キーカードを保証する（7枚の中に1枚は含める）
+        </label>
+        <div id="key-card-selection">
+          <p>キーカードを選択:</p>
+          <div id="key-card-checkboxes">
+            <!-- JavaScriptで動的に生成 -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="handleShuffle()">デッキをシャッフル</button>
+
+    <div id="result"></div>
+  </div>
 
   <script>
     // モックデータを定数として定義
@@ -77,34 +150,168 @@
       ]
     };
 
-    function shuffleDeck(list, subList) {
-      const mainDeck = [];
+    // キーカードのチェックボックスを生成
+    function generateKeyCardCheckboxes() {
+      const container = document.getElementById('key-card-checkboxes');
+      container.innerHTML = MOCK_DECK_DATA.list.map(card => `
+        <label>
+          <input type="checkbox" name="key-card" value="${card.card_number}">
+          ${card.name} (${card.card_number})
+        </label>
+      `).join('');
+    }
+
+    // ページ読み込み時にチェックボックスを生成
+    generateKeyCardCheckboxes();
+
+    function createDeck(list) {
+      const deck = [];
       list.forEach(card => {
         for (let i = 0; i < card.num; i++) {
-          mainDeck.push({...card}); // スプレッド演算子で新しいオブジェクトを作成
+          deck.push({...card});
         }
       });
-      const subDeck = [];
-      subList.forEach(card => {
-        for (let i = 0; i < card.num; i++) {
-          subDeck.push({...card});
-        }
-      });
+      return deck;
+    }
 
-      // Fisher-Yatesシャッフルアルゴリズムを使用
-      for (let i = mainDeck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [mainDeck[i], mainDeck[j]] = [mainDeck[j], mainDeck[i]];
+    // Fisher-Yatesシャッフル
+    function fisherYatesShuffleDeck(deck, intensity = 1) {
+      const shuffled = [...deck];
+      for (let k = 0; k < intensity; k++) {
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
       }
-      for (let i = subDeck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [subDeck[i], subDeck[j]] = [subDeck[j], subDeck[i]];
+      return shuffled;
+    }
+
+    // リップルシャッフル
+    function riffleShuffleDeck(deck, intensity = 1) {
+      let shuffled = [...deck];
+      for (let k = 0; k < intensity; k++) {
+        const mid = Math.floor(shuffled.length / 2);
+        const left = shuffled.slice(0, mid);
+        const right = shuffled.slice(mid);
+        shuffled = [];
+        
+        while (left.length && right.length) {
+          if (Math.random() < 0.5) {
+            shuffled.push(left.shift());
+          } else {
+            shuffled.push(right.shift());
+          }
+        }
+        shuffled = [...shuffled, ...left, ...right];
       }
+      return shuffled;
+    }
+
+    // ヒンドゥーシャッフル
+    function hinduShuffleDeck(deck, intensity = 1) {
+      let shuffled = [...deck];
+      for (let k = 0; k < intensity; k++) {
+        const result = [];
+        while (shuffled.length > 0) {
+          const cutSize = Math.floor(Math.random() * Math.min(shuffled.length, 5)) + 1;
+          const cut = shuffled.splice(0, cutSize);
+          result.unshift(...cut);
+        }
+        shuffled = result;
+      }
+      return shuffled;
+    }
+
+    // ファロシャッフル
+    function faroShuffleDeck(deck, intensity = 1) {
+      let shuffled = [...deck];
+      for (let k = 0; k < intensity; k++) {
+        const mid = Math.floor(shuffled.length / 2);
+        const left = shuffled.slice(0, mid);
+        const right = shuffled.slice(mid);
+        shuffled = [];
+        
+        for (let i = 0; i < Math.max(left.length, right.length); i++) {
+          if (i < right.length) shuffled.push(right[i]);
+          if (i < left.length) shuffled.push(left[i]);
+        }
+      }
+      return shuffled;
+    }
+
+    function getShuffleIntensity(type) {
+      switch (type) {
+        case 'soft': return 1;
+        case 'intensive': return 3;
+        default: return 2;
+      }
+    }
+
+    function ensureKeyCards(deck, keyCards, topN = 7) {
+      if (!keyCards.length) return deck;
+      
+      const topDeck = deck.slice(0, topN);
+      const hasKeyCard = topDeck.some(card => keyCards.includes(card.card_number));
+      
+      if (!hasKeyCard) {
+        const remainingDeck = deck.slice(topN);
+        const keyCardIndex = remainingDeck.findIndex(card => 
+          keyCards.includes(card.card_number)
+        );
+        
+        if (keyCardIndex >= 0) {
+          const randomPosition = Math.floor(Math.random() * topN);
+          const keyCard = remainingDeck.splice(keyCardIndex, 1)[0];
+          topDeck.splice(randomPosition, 1);
+          topDeck.splice(randomPosition, 0, keyCard);
+          return [...topDeck, ...remainingDeck];
+        }
+      }
+      
+      return deck;
+    }
+
+    function shuffleDeckWithOptions(list, subList, options = {}) {
+      const {
+        shuffleType = 'normal',
+        pattern = 'fisher-yates',
+        keyCards = []
+      } = options;
+
+      const mainDeck = createDeck(list);
+      const subDeck = createDeck(subList);
+      const intensity = getShuffleIntensity(shuffleType);
+
+      let shuffledMain;
+      switch (pattern) {
+        case 'riffle':
+          shuffledMain = riffleShuffleDeck(mainDeck, intensity);
+          break;
+        case 'hindu':
+          shuffledMain = hinduShuffleDeck(mainDeck, intensity);
+          break;
+        case 'faro':
+          shuffledMain = faroShuffleDeck(mainDeck, intensity);
+          break;
+        default:
+          shuffledMain = fisherYatesShuffleDeck(mainDeck, intensity);
+      }
+
+      if (keyCards.length > 0) {
+        shuffledMain = ensureKeyCards(shuffledMain, keyCards);
+      }
+
+      const shuffledSub = fisherYatesShuffleDeck(subDeck);
 
       return {
-        mainDeck: mainDeck.slice(0, 7),
-        subDeck: subDeck.slice(0, 1)
+        mainDeck: shuffledMain.slice(0, 7),
+        subDeck: shuffledSub.slice(0, 1)
       };
+    }
+
+    function getSelectedKeyCards() {
+      const checkboxes = document.querySelectorAll('input[name="key-card"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value);
     }
 
     function displayResults(shuffledResults) {
@@ -113,13 +320,13 @@
         <div class="shuffle-result">
           <h3>シャッフル結果 ${index + 1}</h3>
           <div class="card-list">
-            <strong>メインデッキ:</strong><br>
+            <strong>メインデッキ（7枚）:</strong><br>
             ${result.mainDeck.map((card, i) => 
               `${i + 1}. ${card.name} (${card.card_number})`
             ).join('<br>')}
           </div>
           <div class="card-list">
-            <strong>サブデッキ:</strong><br>
+            <strong>サブデッキ（1枚）:</strong><br>
             ${result.subDeck.map(card => 
               `・${card.name} (${card.card_number})`
             ).join('<br>')}
@@ -132,6 +339,10 @@
     function handleShuffle() {
       const deckId = document.getElementById("deck-id").value.trim();
       const outputCount = parseInt(document.getElementById("output-count").value, 10);
+      const shuffleType = document.getElementById("shuffle-type").value;
+      const shufflePattern = document.getElementById("shuffle-pattern").value;
+      const ensureKey = document.getElementById("ensure-key-cards").checked;
+      const keyCards = ensureKey ? getSelectedKeyCards() : [];
 
       if (!deckId) {
         alert("デッキコードを入力してください。");
@@ -143,10 +354,19 @@
         return;
       }
 
-      // モックデータを使用してシャッフル
+      const options = {
+        shuffleType,
+        pattern: shufflePattern,
+        keyCards
+      };
+
       const results = [];
       for (let i = 0; i < outputCount; i++) {
-        results.push(shuffleDeck(MOCK_DECK_DATA.list, MOCK_DECK_DATA.sub_list));
+        results.push(shuffleDeckWithOptions(
+          MOCK_DECK_DATA.list,
+          MOCK_DECK_DATA.sub_list,
+          options
+        ));
       }
 
       displayResults(results);
