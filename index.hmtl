@@ -23,7 +23,7 @@
   </style>
 </head>
 <body>
-  <h1>hocg deck shuffle</h1>
+  <h1>Deck Shuffle App</h1>
   <p>Enter the deck ID and the number of shuffle outputs to display.</p>
   <label for="deck-id">Deck ID:</label>
   <input type="text" id="deck-id" placeholder="e.g., 2NZ15">
