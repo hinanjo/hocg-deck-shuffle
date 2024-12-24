@@ -9,7 +9,7 @@
       font-family: Arial, sans-serif;
       padding: 20px;
       line-height: 1.6;
-      max-width: 600px;
+      max-width: 800px;
       margin: auto;
     }
     input, button {
@@ -34,87 +34,102 @@
       padding: 10px;
       border: 1px solid #ccc;
       background: #f9f9f9;
-      white-space: pre-wrap;
     }
-    .error {
-      color: red;
+    .card-list {
+      margin: 10px 0;
+      padding: 10px;
+      background: #fff;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
   <h1>Deck Shuffle App</h1>
   <p>デッキコードを入力してシャッフル結果を確認してください。</p>
-
-  <label for="deck-id">デッキコードを入力してください（例: 2NZ15）:</label>
-  <input type="text" id="deck-id" placeholder="例: 2NZ15">
   
-  <label for="output-count">出力する結果の数（1-10）:</label>
-  <input type="number" id="output-count" value="3" min="1" max="10">
+  <div>
+    <label for="deck-id">デッキコードを入力してください（例: 2NZ15）:</label>
+    <input type="text" id="deck-id" placeholder="例: 2NZ15">
+  </div>
+  
+  <div>
+    <label for="output-count">出力する結果の数（1-10）:</label>
+    <input type="number" id="output-count" value="3" min="1" max="10">
+  </div>
 
-  <button id="fetch-deck">デッキを取得してシャッフル</button>
+  <button onclick="handleShuffle()">デッキをシャッフル</button>
 
   <div id="result"></div>
 
   <script>
-    async function fetchDeckData(deckId) {
-      // モックデータを返す関数に変更
-      return {
-        "list": [
-          {"name": "【心躍る】アカリ", "card_number": "Ly/WE02-01", "num": 4},
-          {"name": "【最高の応援】アカリ", "card_number": "Ly/WE02-02", "num": 4},
-          {"name": "【スポットライト】アカリ", "card_number": "Ly/WE02-03", "num": 4},
-          {"name": "【笑顔の魔法】アカリ", "card_number": "Ly/WE02-04", "num": 4},
-          {"name": "【楽しい時間】アカリ", "card_number": "Ly/WE02-05", "num": 4}
-        ],
-        "sub_list": [
-          {"name": "【特別な瞬間】アカリ", "card_number": "Ly/WE02-50", "num": 4},
-          {"name": "【輝く未来】アカリ", "card_number": "Ly/WE02-51", "num": 4}
-        ]
-      };
-    }
+    // モックデータを定数として定義
+    const MOCK_DECK_DATA = {
+      "list": [
+        {"name": "【心躍る】アカリ", "card_number": "Ly/WE02-01", "num": 4},
+        {"name": "【最高の応援】アカリ", "card_number": "Ly/WE02-02", "num": 4},
+        {"name": "【スポットライト】アカリ", "card_number": "Ly/WE02-03", "num": 4},
+        {"name": "【笑顔の魔法】アカリ", "card_number": "Ly/WE02-04", "num": 4},
+        {"name": "【楽しい時間】アカリ", "card_number": "Ly/WE02-05", "num": 4}
+      ],
+      "sub_list": [
+        {"name": "【特別な瞬間】アカリ", "card_number": "Ly/WE02-50", "num": 4},
+        {"name": "【輝く未来】アカリ", "card_number": "Ly/WE02-51", "num": 4}
+      ]
+    };
 
     function shuffleDeck(list, subList) {
       const mainDeck = [];
       list.forEach(card => {
         for (let i = 0; i < card.num; i++) {
-          mainDeck.push(card);
+          mainDeck.push({...card}); // スプレッド演算子で新しいオブジェクトを作成
         }
       });
       const subDeck = [];
       subList.forEach(card => {
         for (let i = 0; i < card.num; i++) {
-          subDeck.push(card);
+          subDeck.push({...card});
         }
       });
 
-      mainDeck.sort(() => Math.random() - 0.5);
-      subDeck.sort(() => Math.random() - 0.5);
+      // Fisher-Yatesシャッフルアルゴリズムを使用
+      for (let i = mainDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [mainDeck[i], mainDeck[j]] = [mainDeck[j], mainDeck[i]];
+      }
+      for (let i = subDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [subDeck[i], subDeck[j]] = [subDeck[j], subDeck[i]];
+      }
 
-      return { mainDeck: mainDeck.slice(0, 7), subDeck: subDeck.slice(0, 1) };
+      return {
+        mainDeck: mainDeck.slice(0, 7),
+        subDeck: subDeck.slice(0, 1)
+      };
     }
 
     function displayResults(shuffledResults) {
       const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = ""; // Clear previous results
-
-      shuffledResults.forEach((result, index) => {
-        const mainDeckHtml = result.mainDeck.map(card => `${card.name} (${card.card_number})`).join("\n");
-        const subDeckHtml = result.subDeck.map(card => `${card.name} (${card.card_number})`).join("\n");
-
-        resultDiv.innerHTML += `
-          <div>
-            <h3>Result ${index + 1}</h3>
-            <strong>Main Deck:</strong>
-            <pre>${mainDeckHtml}</pre>
-            <strong>Sub Deck:</strong>
-            <pre>${subDeckHtml}</pre>
+      resultDiv.innerHTML = shuffledResults.map((result, index) => `
+        <div class="shuffle-result">
+          <h3>シャッフル結果 ${index + 1}</h3>
+          <div class="card-list">
+            <strong>メインデッキ:</strong><br>
+            ${result.mainDeck.map((card, i) => 
+              `${i + 1}. ${card.name} (${card.card_number})`
+            ).join('<br>')}
           </div>
-          <hr>
-        `;
-      });
+          <div class="card-list">
+            <strong>サブデッキ:</strong><br>
+            ${result.subDeck.map(card => 
+              `・${card.name} (${card.card_number})`
+            ).join('<br>')}
+          </div>
+        </div>
+        <hr>
+      `).join('');
     }
 
-    document.getElementById("fetch-deck").addEventListener("click", async () => {
+    function handleShuffle() {
       const deckId = document.getElementById("deck-id").value.trim();
       const outputCount = parseInt(document.getElementById("output-count").value, 10);
 
@@ -128,22 +143,14 @@
         return;
       }
 
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "デッキを取得中です...";
-
-      const deckData = await fetchDeckData(deckId);
-      if (!deckData) {
-        resultDiv.innerHTML = `<p class="error">デッキデータを取得できませんでした。デッキコードを確認してください。</p>`;
-        return;
-      }
-
+      // モックデータを使用してシャッフル
       const results = [];
       for (let i = 0; i < outputCount; i++) {
-        results.push(shuffleDeck(deckData.list, deckData.sub_list));
+        results.push(shuffleDeck(MOCK_DECK_DATA.list, MOCK_DECK_DATA.sub_list));
       }
 
       displayResults(results);
-    });
+    }
   </script>
 </body>
 </html>
