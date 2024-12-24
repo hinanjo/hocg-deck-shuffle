@@ -2,32 +2,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deck Shuffle App</title>
-    <!-- インラインスタイルとして直接記述 -->
-    <style>
-        body { padding: 20px; font-family: Arial, sans-serif; }
-        input, button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-    </style>
+    <title>Test</title>
 </head>
 <body>
-    <h1>Deck Shuffle App</h1>
-    <!-- 基本的なフォーム要素のみ -->
-    <input type="text" placeholder="デッキコードを入力">
-    <button>テスト</button>
-
-    <div id="status"></div>
-
-    <script>
-        // 動作確認用の最小限のスクリプト
-        document.querySelector('button').addEventListener('click', () => {
-            document.getElementById('status').textContent = 'ボタンがクリックされました';
-        });
-    </script>
+    <h1>テスト</h1>
 </body>
 </html>
