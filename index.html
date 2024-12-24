@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Advanced Deck Shuffle App</title>
   <style>
+    /* 必要なスタイルはそのまま維持 */
     :root {
       --primary-color: #007BFF;
       --primary-hover: #0056b3;
@@ -15,14 +16,8 @@
       --shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-family: Arial, sans-serif;
       line-height: 1.6;
       background-color: var(--background-color);
       color: var(--text-color);
@@ -48,17 +43,7 @@
       margin-bottom: 1rem;
     }
 
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 1.5rem;
-      }
-    }
-
-    .input-group {
-      margin-bottom: 1rem;
-    }
-
-    input, select, button {
+    input, button {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
@@ -80,289 +65,76 @@
       background-color: var(--primary-hover);
     }
 
-    .shuffle-options {
-      display: grid;
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-
-    @media (min-width: 768px) {
-      .shuffle-options {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .key-cards {
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin: 1rem 0;
-    }
-
-    .key-card-checkboxes {
-      display: grid;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-
-    @media (min-width: 768px) {
-      .key-card-checkboxes {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .result-card {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      border-left: 4px solid var(--primary-color);
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-
-    @media (max-width: 480px) {
-      .action-buttons {
-        flex-direction: column;
-      }
-    }
-
-    .secondary-button {
-      background-color: #6c757d;
-    }
-
-    .secondary-button:hover {
-      background-color: #5a6268;
-    }
-
-    .saved-results {
-      margin-top: 2rem;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 24px;
-      z-index: 1000;
-      display: none;
-    }
-
-    .floating-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--primary-color);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      cursor: pointer;
-      z-index: 100;
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
-      <h1>Advanced Deck Shuffle</h1>
-      <div class="input-group">
-        <label for="deck-id">デッキコード:</label>
-        <input type="text" id="deck-id" placeholder="例: 2NZ15">
-      </div>
-
-      <div class="input-group">
-        <label for="output-count">シャッフル回数 (1-10):</label>
-        <input type="number" id="output-count" value="3" min="1" max="10">
-      </div>
-
-      <div class="shuffle-options">
-        <div class="input-group">
-          <label for="shuffle-type">シャッフル強度:</label>
-          <select id="shuffle-type">
-            <option value="normal">通常シャッフル</option>
-            <option value="soft">ソフトシャッフル</option>
-            <option value="intensive">インテンシブシャッフル</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <label for="shuffle-pattern">シャッフルパターン:</label>
-          <select id="shuffle-pattern">
-            <option value="fisher-yates">ランダムシャッフル</option>
-            <option value="riffle">リップルシャッフル</option>
-            <option value="hindu">ヒンドゥーシャッフル</option>
-            <option value="faro">ファロシャッフル</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="key-cards">
-        <label>
-          <input type="checkbox" id="ensure-key-cards">
-          キーカードを保証する
-        </label>
-        <div id="key-card-selection">
-          <div id="key-card-checkboxes" class="key-card-checkboxes"></div>
-        </div>
-      </div>
-
-      <button onclick="handleShuffle()">シャッフル実行</button>
+      <h1>Advanced Deck Shuffle with API</h1>
+      <label for="deck-id">デッキコード:</label>
+      <input type="text" id="deck-id" placeholder="例: 2NZ15">
+      <button id="fetch-deck">APIからデータを取得</button>
     </div>
 
-    <div id="result"></div>
-    
-    <div class="saved-results card" id="saved-results" style="display: none;">
-      <h2>保存済みの結果</h2>
-      <div id="saved-results-content"></div>
-    </div>
+    <div id="result">結果がここに表示されます。</div>
   </div>
 
-  <div class="toast" id="toast"></div>
-  <div class="floating-button" onclick="showSavedResults()">💾</div>
-
   <script>
-    // 既存のデッキデータと各種シャッフル関数は維持
+    const CORS_PROXY = "https://cors-anywhere.herokuapp.com/"; // CORSプロキシのURL
+    const API_BASE_URL = "https://decklog.bushiroad.com/system/app/api/view/";
 
-    // 保存機能のための関数
-    function saveResult(result) {
-      const saved = JSON.parse(localStorage.getItem('savedResults') || '[]');
-      const timestamp = new Date().toLocaleString();
-      saved.push({
-        ...result,
-        timestamp,
-        id: Date.now()
-      });
-      localStorage.setItem('savedResults', JSON.stringify(saved.slice(-10))); // 最新10件のみ保持
-      showToast('結果を保存しました');
-    }
+    async function fetchDeckData(deckId) {
+      const apiUrl = `${CORS_PROXY}${API_BASE_URL}${deckId}`;
+      const headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+      };
 
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.style.display = 'block';
-      setTimeout(() => {
-        toast.style.display = 'none';
-      }, 3000);
-    }
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: headers,
+        });
 
-    // 共有機能
-    async function shareResult(result) {
-      const text = formatResultForSharing(result);
-      
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: 'デッキシャッフル結果',
-            text: text
-          });
-        } catch (err) {
-          fallbackShare(text);
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status}`);
         }
-      } else {
-        fallbackShare(text);
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error(error);
+        alert("デッキデータの取得に失敗しました。");
+        return null;
       }
     }
 
-    function fallbackShare(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        showToast('結果をクリップボードにコピーしました');
-      });
-    }
-
-    function formatResultForSharing(result) {
-      const mainDeckText = result.mainDeck
-        .map((card, i) => `${i + 1}. ${card.name} (${card.card_number})`)
-        .join('\n');
-      
-      const subDeckText = result.subDeck
-        .map(card => `・${card.name} (${card.card_number})`)
-        .join('\n');
-
-      return `デッキシャッフル結果\n\nメインデッキ:\n${mainDeckText}\n\nサブデッキ:\n${subDeckText}`;
-    }
-
-    // 保存済み結果の表示
-    function showSavedResults() {
-      const savedResultsDiv = document.getElementById('saved-results');
-      const savedResultsContent = document.getElementById('saved-results-content');
-      const saved = JSON.parse(localStorage.getItem('savedResults') || '[]');
-
-      if (saved.length === 0) {
-        savedResultsContent.innerHTML = '<p>保存された結果はありません</p>';
-      } else {
-        savedResultsContent.innerHTML = saved.map(result => `
-          <div class="result-card">
-            <p><small>${result.timestamp}</small></p>
-            <div class="card-list">
-              <strong>メインデッキ:</strong><br>
-              ${result.mainDeck.map((card, i) => 
-                `${i + 1}. ${card.name} (${card.card_number})`
-              ).join('<br>')}
-            </div>
-            <div class="card-list">
-              <strong>サブデッキ:</strong><br>
-              ${result.subDeck.map(card => 
-                `・${card.name} (${card.card_number})`
-              ).join('<br>')}
-            </div>
-            <button class="secondary-button" onclick="deleteResult(${result.id})">削除</button>
-          </div>
-        `).join('');
+    document.getElementById("fetch-deck").addEventListener("click", async () => {
+      const deckId = document.getElementById("deck-id").value.trim();
+      if (!deckId) {
+        alert("デッキコードを入力してください。");
+        return;
       }
 
-      savedResultsDiv.style.display = 'block';
-    }
-
-    function deleteResult(id) {
-      const saved = JSON.parse(localStorage.getItem('savedResults') || '[]');
-      const filtered = saved.filter(result => result.id !== id);
-      localStorage.setItem('savedResults', JSON.stringify(filtered));
-      showSavedResults();
-      showToast('結果を削除しました');
-    }
-
-    // 結果表示関数の更新
-    function displayResults(shuffledResults) {
       const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = shuffledResults.map((result, index) => `
-        <div class="result-card">
-          <h3>シャッフル結果 ${index + 1}</h3>
-          <div class="card-list">
-            <strong>メインデッキ:</strong><br>
-            ${result.mainDeck.map((card, i) => 
-              `${i + 1}. ${card.name} (${card.card_number})`
-            ).join('<br>')}
-          </div>
-          <div class="card-list">
-            <strong>サブデッキ:</strong><br>
-            ${result.subDeck.map(card => 
-              `・${card.name} (${card.card_number})`
-            ).join('<br>')}
-          </div>
-          <div class="action-buttons">
-            <button onclick="saveResult(${JSON.stringify(result)})">保存</button>
-            <button class="secondary-button" onclick="shareResult(${JSON.stringify(result)})">共有</button>
-          </div>
-        </div>
-      `).join('');
-    }
+      resultDiv.textContent = "デッキデータを取得中...";
 
-    // 既存のその他の関数は維持
-    // ...（previous code for shuffling functionality）...
+      const deckData = await fetchDeckData(deckId);
+      if (!deckData) {
+        resultDiv.textContent = "データの取得に失敗しました。";
+        return;
+      }
 
+      resultDiv.textContent = JSON.stringify(deckData, null, 2);
+    });
   </script>
 </body>
 </html>
