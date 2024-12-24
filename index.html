@@ -87,35 +87,37 @@
   </div>
 
   <script>
-    const CORS_PROXY = "https://cors-anywhere.herokuapp.com/"; // CORSプロキシのURL
-    const API_BASE_URL = "https://decklog.bushiroad.com/system/app/api/view/";
-
     async function fetchDeckData(deckId) {
-      const apiUrl = `${CORS_PROXY}${API_BASE_URL}${deckId}`;
-      const headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-      };
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: headers,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP Error: ${response.status}`);
+      const CORS_PROXY = "https://proxy.cors.sh/";
+      const API_BASE_URL = "https://decklog.bushiroad.com/system/app/api/view/";
+      
+      async function fetchDeckData(deckId) {
+        const apiUrl = `${CORS_PROXY}${API_BASE_URL}${deckId}`;
+        const headers = {
+          "User-Agent": "Mozilla/5.0",
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        };
+      
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: headers,
+          });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+          }
+      
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error(error);
+          alert("デッキデータの取得に失敗しました。");
+          return null;
         }
-
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error(error);
-        alert("デッキデータの取得に失敗しました。");
-        return null;
       }
-    }
+
 
     document.getElementById("fetch-deck").addEventListener("click", async () => {
       const deckId = document.getElementById("deck-id").value.trim();
