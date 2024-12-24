@@ -5,22 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Advanced Deck Shuffle App</title>
   <style>
-    /* 必要なスタイルはそのまま維持 */
-    :root {
-      --primary-color: #007BFF;
-      --primary-hover: #0056b3;
-      --background-color: #f5f5f5;
-      --card-background: #ffffff;
-      --border-color: #ddd;
-      --text-color: #333;
-      --shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
     body {
       font-family: Arial, sans-serif;
       line-height: 1.6;
-      background-color: var(--background-color);
-      color: var(--text-color);
+      background-color: #f5f5f5;
+      color: #333;
       padding: 16px;
     }
 
@@ -28,41 +17,30 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 16px;
-    }
-
-    .card {
-      background: var(--card-background);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     input, button {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
-      border: 1px solid var(--border-color);
+      border: 1px solid #ddd;
       border-radius: 8px;
       font-size: 16px;
     }
 
     button {
-      background-color: var(--primary-color);
+      background-color: #007BFF;
       color: white;
       border: none;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-weight: 600;
+      font-weight: bold;
     }
 
     button:hover {
-      background-color: var(--primary-hover);
+      background-color: #0056b3;
     }
 
     #result {
@@ -76,48 +54,45 @@
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <h1>Advanced Deck Shuffle with API</h1>
-      <label for="deck-id">デッキコード:</label>
-      <input type="text" id="deck-id" placeholder="例: 2NZ15">
-      <button id="fetch-deck">APIからデータを取得</button>
-    </div>
-
-    <div id="result">結果がここに表示されます。</div>
+    <h1>Advanced Deck Shuffle App</h1>
+    <label for="deck-id">デッキコードを入力してください:</label>
+    <input type="text" id="deck-id" placeholder="例: 2NZ15">
+    <button id="fetch-deck">デッキデータを取得</button>
+    <div id="result">ここに結果が表示されます。</div>
   </div>
 
   <script>
-    async function fetchDeckData(deckId) {
-      const CORS_PROXY = "https://proxy.cors.sh/";
-      const API_BASE_URL = "https://decklog.bushiroad.com/system/app/api/view/";
-      
-      async function fetchDeckData(deckId) {
-        const apiUrl = `${CORS_PROXY}${API_BASE_URL}${deckId}`;
-        const headers = {
-          "User-Agent": "Mozilla/5.0",
-          "Accept": "application/json, text/plain, */*",
-          "Content-Type": "application/json",
-        };
-      
-        try {
-          const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: headers,
-          });
-      
-          if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
-          }
-      
-          const data = await response.json();
-          return data;
-        } catch (error) {
-          console.error(error);
-          alert("デッキデータの取得に失敗しました。");
-          return null;
-        }
-      }
+    const API_BASE_URL = "https://decklog.bushiroad.com/system/app/api/view/";
 
+    async function fetchDeckData(deckId) {
+      const apiUrl = `${API_BASE_URL}${deckId}`;
+      const headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        "Referer": "https://decklog.bushiroad.com/view/",
+        "Origin": "https://decklog.bushiroad.com"
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: headers,
+          credentials: "include" // Cookieを送信するため
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error(error);
+        alert("デッキデータの取得に失敗しました。");
+        return null;
+      }
+    }
 
     document.getElementById("fetch-deck").addEventListener("click", async () => {
       const deckId = document.getElementById("deck-id").value.trim();
