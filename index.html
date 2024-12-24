@@ -9,59 +9,70 @@
       font-family: Arial, sans-serif;
       padding: 20px;
       line-height: 1.6;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     #result {
       margin-top: 20px;
       padding: 10px;
       border: 1px solid #ccc;
       background: #f9f9f9;
+      white-space: pre-wrap;
     }
-    button {
-      padding: 10px 15px;
-      font-size: 16px;
+    .error {
+      color: red;
     }
   </style>
 </head>
 <body>
   <h1>Deck Shuffle App</h1>
-  <p>Enter the deck ID and the number of shuffle outputs to display.</p>
-  <label for="deck-id">Deck ID:</label>
-  <input type="text" id="deck-id" placeholder="e.g., 2NZ15">
-  <br>
-  <label for="output-count">Number of Outputs (1-10):</label>
+  <p>デッキコードを入力してシャッフル結果を確認してください。</p>
+
+  <label for="deck-id">デッキコードを入力してください（例: 2NZ15）:</label>
+  <input type="text" id="deck-id" placeholder="例: 2NZ15">
+  
+  <label for="output-count">出力する結果の数（1-10）:</label>
   <input type="number" id="output-count" value="3" min="1" max="10">
-  <br>
-  <button id="fetch-deck">Fetch and Shuffle</button>
+
+  <button id="fetch-deck">デッキを取得してシャッフル</button>
 
   <div id="result"></div>
 
   <script>
     async function fetchDeckData(deckId) {
-      // CORS Anywhereのプロキシサーバーを使用
-      const proxyUrl = 'https://corsproxy.io/?';
-      const apiUrl = `${proxyUrl}${encodeURIComponent(`https://decklog.bushiroad.com/system/app/api/view/${deckId}`)}`;
-      
-      const headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
+      // モックデータを返す関数に変更
+      return {
+        "list": [
+          {"name": "【心躍る】アカリ", "card_number": "Ly/WE02-01", "num": 4},
+          {"name": "【最高の応援】アカリ", "card_number": "Ly/WE02-02", "num": 4},
+          {"name": "【スポットライト】アカリ", "card_number": "Ly/WE02-03", "num": 4},
+          {"name": "【笑顔の魔法】アカリ", "card_number": "Ly/WE02-04", "num": 4},
+          {"name": "【楽しい時間】アカリ", "card_number": "Ly/WE02-05", "num": 4}
+        ],
+        "sub_list": [
+          {"name": "【特別な瞬間】アカリ", "card_number": "Ly/WE02-50", "num": 4},
+          {"name": "【輝く未来】アカリ", "card_number": "Ly/WE02-51", "num": 4}
+        ]
       };
-    
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: headers,
-        });
-    
-        if (!response.ok) {
-          throw new Error(`HTTP Error: ${response.status}`);
-        }
-    
-        return await response.json();
-      } catch (error) {
-        console.error('Error fetching deck data:', error);
-        return null;
-      }
     }
+
     function shuffleDeck(list, subList) {
       const mainDeck = [];
       list.forEach(card => {
@@ -87,16 +98,16 @@
       resultDiv.innerHTML = ""; // Clear previous results
 
       shuffledResults.forEach((result, index) => {
-        const mainDeckHtml = result.mainDeck.map(card => `<li>${card.name} (${card.card_number})</li>`).join("");
-        const subDeckHtml = result.subDeck.map(card => `<li>${card.name} (${card.card_number})</li>`).join("");
+        const mainDeckHtml = result.mainDeck.map(card => `${card.name} (${card.card_number})`).join("\n");
+        const subDeckHtml = result.subDeck.map(card => `${card.name} (${card.card_number})`).join("\n");
 
         resultDiv.innerHTML += `
           <div>
             <h3>Result ${index + 1}</h3>
             <strong>Main Deck:</strong>
-            <ul>${mainDeckHtml}</ul>
+            <pre>${mainDeckHtml}</pre>
             <strong>Sub Deck:</strong>
-            <ul>${subDeckHtml}</ul>
+            <pre>${subDeckHtml}</pre>
           </div>
           <hr>
         `;
@@ -108,17 +119,21 @@
       const outputCount = parseInt(document.getElementById("output-count").value, 10);
 
       if (!deckId) {
-        alert("Please enter a valid deck ID.");
+        alert("デッキコードを入力してください。");
         return;
       }
 
       if (isNaN(outputCount) || outputCount < 1 || outputCount > 10) {
-        alert("Please enter a number between 1 and 10.");
+        alert("出力する結果の数は1から10の間で指定してください。");
         return;
       }
 
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "デッキを取得中です...";
+
       const deckData = await fetchDeckData(deckId);
       if (!deckData) {
+        resultDiv.innerHTML = `<p class="error">デッキデータを取得できませんでした。デッキコードを確認してください。</p>`;
         return;
       }
 
