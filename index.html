@@ -37,33 +37,31 @@
 
   <script>
     async function fetchDeckData(deckId) {
-      const apiUrl = `https://decklog.bushiroad.com/system/app/api/view/${deckId}`;
+      // CORS Anywhereのプロキシサーバーを使用
+      const proxyUrl = 'https://corsproxy.io/?';
+      const apiUrl = `${proxyUrl}${encodeURIComponent(`https://decklog.bushiroad.com/system/app/api/view/${deckId}`)}`;
+      
       const headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        "Dnt": "1"
+        "Accept": "application/json",
+        "Content-Type": "application/json"
       };
-
+    
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: headers,
         });
-
+    
         if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
+          throw new Error(`HTTP Error: ${response.status}`);
         }
-
-        const data = await response.json();
-        return data;
+    
+        return await response.json();
       } catch (error) {
-        console.error(error);
-        alert("Failed to fetch deck data. Please check the deck ID.");
+        console.error('Error fetching deck data:', error);
         return null;
       }
     }
-
     function shuffleDeck(list, subList) {
       const mainDeck = [];
       list.forEach(card => {
