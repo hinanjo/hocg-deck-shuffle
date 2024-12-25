@@ -30,7 +30,7 @@
     }
 
     .container {
-      max-width: 800px;
+      max-width: 1200px;
       margin: 2rem auto;
       padding: 0 1rem;
     }
@@ -117,7 +117,7 @@
     }
 
     .deck-section {
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .deck-section:last-child {
@@ -126,21 +126,71 @@
 
     .deck-title {
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-color);
     }
 
-    .card-list {
-      list-style: none;
-      padding-left: 1rem;
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
     }
 
     .card-item {
-      padding: 0.25rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--card-background);
+      border-radius: 8px;
+      padding: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card-image {
+      width: 100%;
+      aspect-ratio: 400/558;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.2s ease;
+    }
+
+    .card-image img:hover {
+      transform: scale(1.05);
+    }
+
+    .card-details {
+      width: 100%;
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    .card-number {
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-right: 0.25rem;
+    }
+
+    .card-name {
+      font-weight: 500;
+      display: block;
+      margin: 0.25rem 0;
+    }
+
+    .card-id {
+      font-size: 0.8rem;
+      color: #666;
     }
 
     .error-message {
+      color: var(--error-color);
       background-color: #FFF2F2;
-      border-left: 4px solid var(--error-color);
       padding: 1rem;
       border-radius: 8px;
       margin-bottom: 1rem;
@@ -158,12 +208,8 @@
         margin: 1rem auto;
       }
 
-      .app-title {
-        font-size: 1.5rem;
-      }
-
-      .input-card, .result-card {
-        padding: 1rem;
+      .card-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       }
     }
   </style>
@@ -273,20 +319,47 @@
           
           <div class="deck-section">
             <h4 class="deck-title">メインデッキ (7枚)</h4>
-            <ul class="card-list">
+            <div class="card-grid">
               ${result.mainDeck.map((card, i) => `
-                <li class="card-item">${i + 1}. ${card.name} (${card.card_number})</li>
+                <div class="card-item">
+                  <div class="card-image">
+                    <img 
+                      src="images/${card.img.replace(/\\/g, '/')}" 
+                      alt="${card.name}"
+                      loading="lazy"
+                      onerror="this.src='images/Back_side.png'"
+                    >
+                  </div>
+                  <div class="card-details">
+                    <span class="card-number">${i + 1}.</span>
+                    <span class="card-name">${card.name}</span>
+                    <span class="card-id">(${card.card_number})</span>
+                  </div>
+                </div>
               `).join('')}
-            </ul>
+            </div>
           </div>
 
           <div class="deck-section">
             <h4 class="deck-title">サブデッキ (1枚)</h4>
-            <ul class="card-list">
+            <div class="card-grid">
               ${result.subDeck.map(card => `
-                <li class="card-item">・${card.name} (${card.card_number})</li>
+                <div class="card-item">
+                  <div class="card-image">
+                    <img 
+                      src="images/${card.img.replace(/\\/g, '/')}" 
+                      alt="${card.name}"
+                      loading="lazy"
+                      onerror="this.src='images/Back_side.png'"
+                    >
+                  </div>
+                  <div class="card-details">
+                    <span class="card-name">${card.name}</span>
+                    <span class="card-id">(${card.card_number})</span>
+                  </div>
+                </div>
               `).join('')}
-            </ul>
+            </div>
           </div>
         </div>
       `).join('');
