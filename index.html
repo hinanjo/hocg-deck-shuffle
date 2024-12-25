@@ -3,17 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Fetch Example</title>
+  <title>Deck Shuffle Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    #container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    input, button, select {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    #output {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
-  <h1>Deck Data Fetcher</h1>
-  <button id="fetchButton">Fetch Deck Data</button>
-  <pre id="output"></pre>
-
+  <h1>Deck Shuffle Simulator</h1>
+  <div id="container">
+    <input type="text" id="deckIdInput" placeholder="Enter Deck ID (e.g., 2NZ15)" />
+    <select id="repeatCount">
+      <option value="1">1 time</option>
+      <option value="3" selected>3 times</option>
+      <option value="5">5 times</option>
+      <option value="10">10 times</option>
+    </select>
+    <button id="fetchButton">Generate and Shuffle</button>
+    <button id="screenshotButton">Take Screenshot</button>
+    <div id="output"></div>
+  </div>
+  
+  <!-- Script -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     document.getElementById('fetchButton').addEventListener('click', async () => {
+      const deckId = document.getElementById('deckIdInput').value.trim();
+      const repeatCount = parseInt(document.getElementById('repeatCount').value, 10);
+      const outputDiv = document.getElementById('output');
+      outputDiv.textContent = 'Fetching and shuffling data...';
+
+      if (!deckId) {
+        alert('Please enter a valid Deck ID.');
+        return;
+      }
+
       try {
-        const deckId = "2NZ15"; // サンプルデッキID
         const response = await fetch(`https://hocg-card-shuffle.vercel.app/proxy/${deckId}`, {
           method: 'POST',
           headers: {
@@ -27,11 +74,45 @@
         }
 
         const data = await response.json();
-        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+        const results = [];
+
+        for (let i = 0; i < repeatCount; i++) {
+          const list = [...data.list];
+          const subList = [...data.sub_list];
+
+          // Shuffle function
+          const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+
+          // Shuffle decks
+          shuffle(list);
+          shuffle(subList);
+
+          // Draw cards
+          const drawnList = list.slice(0, 7);
+          const drawnSubList = subList.slice(0, 1);
+
+          results.push({
+            attempt: i + 1,
+            list: drawnList,
+            subList: drawnSubList
+          });
+        }
+
+        outputDiv.textContent = JSON.stringify(results, null, 2);
       } catch (error) {
         console.error('Error:', error);
-        document.getElementById('output').textContent = 'Failed to fetch data';
+        outputDiv.textContent = 'Failed to fetch data';
       }
+    });
+
+    // Screenshot functionality
+    document.getElementById('screenshotButton').addEventListener('click', () => {
+      html2canvas(document.getElementById('output')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'deck_result.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
     });
   </script>
 </body>
