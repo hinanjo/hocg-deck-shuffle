@@ -3,241 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Deck Shuffle App</title>
+  <title>Simple Deck Shuffle</title>
   <style>
-    :root {
-      --primary-color: #007BFF;
-      --primary-hover: #0056b3;
-      --background-color: #f5f5f5;
-      --card-background: #ffffff;
-      --border-color: #ddd;
-      --text-color: #333;
-      --shadow: 0 2px 4px rgba(0,0,0,0.1);
-      --error-color: #dc3545;
-      --success-color: #28a745;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      line-height: 1.6;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      padding: 16px;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
     }
 
     .container {
       max-width: 800px;
       margin: 0 auto;
-      padding: 16px;
-    }
-
-    .card {
-      background: var(--card-background);
-      border-radius: 12px;
+      background: white;
       padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    h1, h2, h3 {
-      margin-bottom: 1rem;
-    }
-
-    .input-group {
-      margin-bottom: 1rem;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: 1px solid var(--border-color);
       border-radius: 8px;
-      font-size: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    input, button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
 
     button {
-      background-color: var(--primary-color);
+      background-color: #007BFF;
       color: white;
       border: none;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-weight: 600;
     }
 
     button:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .loading {
-      text-align: center;
-      padding: 20px;
-      font-style: italic;
-      color: #666;
-    }
-
-    .error {
-      color: var(--error-color);
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-    }
-
-    .success {
-      color: var(--success-color);
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-    }
-
-    .debug-panel {
-      background: #2d2d2d;
-      color: #fff;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      font-family: monospace;
-      white-space: pre-wrap;
-      display: none;
-    }
-
-    .shuffle-options {
-      display: grid;
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-
-    @media (min-width: 768px) {
-      .shuffle-options {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      background-color: #0056b3;
     }
 
     .result-card {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      border-left: 4px solid var(--primary-color);
+      background: #f8f9fa;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border-left: 4px solid #007BFF;
     }
 
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 24px;
-      z-index: 1000;
-      display: none;
-    }
-
-    #debug-toggle {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: auto;
-      padding: 8px 16px;
-      font-size: 14px;
-      background: #2d2d2d;
+    .error {
+      color: #dc3545;
+      background-color: #f8d7da;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <h1>Advanced Deck Shuffle</h1>
-      
-      <div class="input-group">
-        <label for="deck-id">デッキコード:</label>
-        <input type="text" id="deck-id" placeholder="例: 2NZ15" value="2NZ15">
-      </div>
-
-      <div class="input-group">
-        <label for="output-count">シャッフル回数 (1-10):</label>
-        <input type="number" id="output-count" value="3" min="1" max="10">
-      </div>
-
-      <div class="shuffle-options">
-        <div class="input-group">
-          <label for="shuffle-type">シャッフル強度:</label>
-          <select id="shuffle-type">
-            <option value="normal">通常シャッフル</option>
-            <option value="soft">ソフトシャッフル</option>
-            <option value="intensive">インテンシブシャッフル</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <label for="shuffle-pattern">シャッフルパターン:</label>
-          <select id="shuffle-pattern">
-            <option value="fisher-yates">ランダムシャッフル</option>
-            <option value="riffle">リップルシャッフル</option>
-            <option value="hindu">ヒンドゥーシャッフル</option>
-            <option value="faro">ファロシャッフル</option>
-          </select>
-        </div>
-      </div>
-
-      <button onclick="handleShuffle()">シャッフル実行</button>
-    </div>
-
-    <div id="deck-info" class="card" style="display: none;">
-      <h2>デッキ情報</h2>
-      <div id="deck-title"></div>
-      <div id="deck-details"></div>
-    </div>
-
-    <div class="debug-panel" id="debug-panel"></div>
+    <h1>デッキシャッフル</h1>
+    
+    <input type="text" id="deck-id" placeholder="デッキコードを入力 (例: 2NZ15)" value="2NZ15">
+    <input type="number" id="output-count" value="3" min="1" max="10" placeholder="シャッフル回数 (1-10)">
+    <button onclick="handleShuffle()">シャッフル実行</button>
 
     <div id="result"></div>
   </div>
 
-  <div class="toast" id="toast"></div>
-  <button id="debug-toggle" onclick="toggleDebugPanel()">デバッグパネル</button>
-
   <script>
-    // シンプル化されたログ機能
-    function log(message, data = null) {
-      console.log(message, data);
-      const debugPanel = document.getElementById('debug-panel');
-      const timestamp = new Date().toISOString();
-      const logMessage = `[${timestamp}] ${message}\n${data ? JSON.stringify(data, null, 2) : ''}`;
-      
-      // 既存のログに追加
-      debugPanel.textContent = debugPanel.textContent + '\n\n' + logMessage;
-    }
-
-    function toggleDebugPanel() {
-      const panel = document.getElementById('debug-panel');
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    }
-
     async function fetchDeckData(deckId) {
       const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = '<div class="loading">デッキデータを取得中...</div>';
+      resultDiv.innerHTML = 'デッキデータを取得中...';
 
       try {
-        log(`Fetching deck data for ID: ${deckId}`);
-
         const response = await fetch(`https://hocg-card-shuffle.vercel.app/proxy/${deckId}`, {
           method: 'POST',
           headers: {
@@ -250,44 +87,18 @@
           })
         });
 
-        log('API Response received', {
-          status: response.status,
-          statusText: response.statusText
-        });
-
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data = await response.json();
-        log('Parsed deck data', data);
-
-        if (data) {
-          const deckInfo = document.getElementById("deck-info");
-          const deckTitle = document.getElementById("deck-title");
-          const deckDetails = document.getElementById("deck-details");
-          
-          deckTitle.textContent = `デッキ名: ${data.title || "無題のデッキ"}`;
-          deckDetails.innerHTML = `
-            <p>カード総数: ${data.list?.length || 0}枚</p>
-            <p>デッキID: ${data.deck_id}</p>
-          `;
-          deckInfo.style.display = "block";
-          
-          return data;
-        } else {
-          throw new Error('Empty response received');
-        }
-
+        return await response.json();
       } catch (error) {
-        log('Error in fetchDeckData', error);
         resultDiv.innerHTML = `
           <div class="error">
             デッキデータの取得に失敗しました。<br>
             エラー詳細: ${error.message}
           </div>
         `;
-        document.getElementById('debug-panel').style.display = 'block';
         return null;
       }
     }
@@ -295,8 +106,6 @@
     function shuffleDeck(list, subList) {
       const mainDeck = createDeck(list);
       const subDeck = createDeck(subList || []);
-      
-      log('Created decks', { mainDeckSize: mainDeck.length, subDeckSize: subDeck.length });
 
       return {
         mainDeck: shuffleCards(mainDeck).slice(0, 7),
@@ -316,100 +125,11 @@
 
     function shuffleCards(cards) {
       const shuffled = [...cards];
-      const type = document.getElementById("shuffle-type").value;
-      const pattern = document.getElementById("shuffle-pattern").value;
-      const intensity = getShuffleIntensity(type);
-
-      log('Shuffling cards', { type, pattern, intensity });
-
-      switch (pattern) {
-        case 'riffle':
-          return riffleShuffleDeck(shuffled, intensity);
-        case 'hindu':
-          return hinduShuffleDeck(shuffled, intensity);
-        case 'faro':
-          return faroShuffleDeck(shuffled, intensity);
-        default:
-          return fisherYatesShuffleDeck(shuffled, intensity);
-      }
-    }
-
-    function getShuffleIntensity(type) {
-      switch (type) {
-        case 'soft': return 1;
-        case 'intensive': return 3;
-        default: return 2;
-      }
-    }
-
-    function fisherYatesShuffleDeck(deck, intensity = 1) {
-      const shuffled = [...deck];
-      for (let k = 0; k < intensity; k++) {
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
       return shuffled;
-    }
-
-    function riffleShuffleDeck(deck, intensity = 1) {
-      let shuffled = [...deck];
-      for (let k = 0; k < intensity; k++) {
-        const mid = Math.floor(shuffled.length / 2);
-        const left = shuffled.slice(0, mid);
-        const right = shuffled.slice(mid);
-        shuffled = [];
-        
-        while (left.length && right.length) {
-          if (Math.random() < 0.5) {
-            shuffled.push(left.shift());
-          } else {
-            shuffled.push(right.shift());
-          }
-        }
-        shuffled = [...shuffled, ...left, ...right];
-      }
-      return shuffled;
-    }
-
-    function hinduShuffleDeck(deck, intensity = 1) {
-      let shuffled = [...deck];
-      for (let k = 0; k < intensity; k++) {
-        const result = [];
-        while (shuffled.length > 0) {
-          const cutSize = Math.floor(Math.random() * Math.min(shuffled.length, 5)) + 1;
-          const cut = shuffled.splice(0, cutSize);
-          result.unshift(...cut);
-        }
-        shuffled = result;
-      }
-      return shuffled;
-    }
-
-    function faroShuffleDeck(deck, intensity = 1) {
-      let shuffled = [...deck];
-      for (let k = 0; k < intensity; k++) {
-        const mid = Math.floor(shuffled.length / 2);
-        const left = shuffled.slice(0, mid);
-        const right = shuffled.slice(mid);
-        shuffled = [];
-        
-        for (let i = 0; i < Math.max(left.length, right.length); i++) {
-          if (i < right.length) shuffled.push(right[i]);
-          if (i < left.length) shuffled.push(left[i]);
-        }
-      }
-      return shuffled;
-    }
-
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.style.display = 'block';
-      setTimeout(() => {
-        toast.style.display = 'none';
-      }, 3000);
     }
 
     function displayResults(shuffledResults) {
@@ -417,37 +137,33 @@
       resultDiv.innerHTML = shuffledResults.map((result, index) => `
         <div class="result-card">
           <h3>シャッフル結果 ${index + 1}</h3>
-          <div class="card-list">
+          <div>
             <strong>メインデッキ (7枚):</strong><br>
             ${result.mainDeck.map((card, i) => 
               `${i + 1}. ${card.name} (${card.card_number})`
             ).join('<br>')}
           </div>
-          <div class="card-list">
+          <div>
             <strong>サブデッキ (1枚):</strong><br>
             ${result.subDeck.map(card => 
               `・${card.name} (${card.card_number})`
-            ).join('<br).join('<br>')}
+            ).join('<br>')}
           </div>
         </div>
       `).join('');
-      
-      log('Displayed results', shuffledResults);
     }
 
     async function handleShuffle() {
       const deckId = document.getElementById("deck-id").value.trim();
       const outputCount = parseInt(document.getElementById("output-count").value, 10);
 
-      log('Starting shuffle process', { deckId, outputCount });
-
       if (!deckId) {
-        showToast("デッキコードを入力してください。");
+        alert("デッキコードを入力してください。");
         return;
       }
 
       if (isNaN(outputCount) || outputCount < 1 || outputCount > 10) {
-        showToast("出力する結果の数は1から10の間で指定してください。");
+        alert("シャッフル回数は1から10の間で指定してください。");
         return;
       }
 
@@ -461,11 +177,6 @@
 
       displayResults(results);
     }
-
-    // 初期化時にデバッグパネルを表示
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('debug-panel').style.display = 'block';
-    });
   </script>
 </body>
 </html>
