@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>デッキシャッフル</title>
+  <title>hololive Official Card Game初手ジェネレーター</title>
   <style>
     :root {
       --primary-color: #4A90E2;
@@ -226,12 +226,12 @@
 <body>
   <div class="container">
     <header class="app-header">
-      <h1 class="app-title">デッキシャッフル</h1>
+      <h1 class="app-title">hololive Official Card Game初手ジェネレーター</h1>
     </header>
 
     <div class="input-card">
       <div class="input-group">
-        <label for="deck-id">デッキコード</label>
+        <label for="deck-id">Deck-Logで使用するデッキIDを入力してください。</label>
         <input 
           type="text" 
           id="deck-id" 
@@ -241,7 +241,7 @@
       </div>
 
       <div class="input-group">
-        <label for="output-count">シャッフル回数 (1-10)</label>
+        <label for="output-count">シャッフル回数 (1-10)を指定してください。</label>
         <input 
           type="number" 
           id="output-count" 
@@ -251,7 +251,7 @@
         >
       </div>
 
-      <button onclick="handleShuffle()">シャッフルを実行</button>
+      <button onclick="handleShuffle()">結果を生成</button>
     </div>
 
     <div id="result" class="result-container"></div>
@@ -324,7 +324,7 @@
       const resultDiv = document.getElementById("result");
       resultDiv.innerHTML = shuffledResults.map((result, index) => `
         <div class="result-card">
-          <h3 class="result-title">シャッフル結果 ${index + 1}</h3>
+          <h3 class="result-title">生成結果 ${index + 1}</h3>
           
           <div class="deck-section">
             <h4 class="deck-title">メインデッキ (7枚)</h4>
@@ -350,7 +350,7 @@
           </div>
 
           <div class="deck-section">
-            <h4 class="deck-title">サブデッキ (1枚)</h4>
+            <h4 class="deck-title">エールデッキデッキ (1枚)</h4>
             <div class="card-grid">
               ${result.subDeck.map(card => `
                 <div class="card-item">
