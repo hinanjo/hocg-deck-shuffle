@@ -390,7 +390,7 @@
 
     function shareToTwitter(resultElement) {
       try {        
-        // シンプルな投稿テキストを構築
+        // 投稿テキストを構築（URLを含まない）
         const text = `【初手ジェネレーター】\nmade by ホロカ情報局（@holoca11）\n\n#ホロカ #ホロ活`;
         
         // URLはウェブサイトのベースURLを使用
@@ -401,7 +401,7 @@
         
         // エンコードされたパラメータを使用してURLを構築
         const tweetUrl = new URL('https://twitter.com/intent/tweet');
-        tweetUrl.searchParams.append('text', text + '\n');  // 末尾に改行を追加
+        tweetUrl.searchParams.append('text', text);
         tweetUrl.searchParams.append('url', baseUrl);
     
         if (isMobile) {
@@ -420,7 +420,6 @@
         alert('Xの投稿画面を開けませんでした。\nエラー: ' + error.message);
       }
     }
-
     async function captureResult(resultElement) {
       try {
         // ボタングループを一時的に非表示
