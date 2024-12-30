@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>hololive Official Card Game初手ジェネレーター</title>
+  <title>デッキシャッフル</title>
   <style>
     :root {
       --primary-color: #4A90E2;
@@ -116,12 +116,22 @@
       color: var(--primary-color);
     }
 
-    .deck-section {
-      margin-bottom: 1.5rem;
+    .deck-sections-container {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
     }
 
-    .deck-section:last-child {
+    .deck-section {
       margin-bottom: 0;
+    }
+
+    .deck-section.main-deck {
+      flex: 3;
+    }
+
+    .deck-section.sub-deck {
+      flex: 1;
     }
 
     .deck-title {
@@ -213,6 +223,15 @@
         margin: 1rem auto;
       }
 
+      .deck-sections-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .deck-section {
+        width: 100%;
+      }
+
       .card-grid {
         grid-template-columns: repeat(auto-fill, 140px);
       }
@@ -226,22 +245,22 @@
 <body>
   <div class="container">
     <header class="app-header">
-      <h1 class="app-title">hololive Official Card Game初手ジェネレーター</h1>
+      <h1 class="app-title">デッキシャッフル</h1>
     </header>
 
     <div class="input-card">
       <div class="input-group">
-        <label for="deck-id">Deck-Logで使用するデッキIDを入力してください。</label>
+        <label for="deck-id">デッキコード</label>
         <input 
           type="text" 
           id="deck-id" 
           placeholder="例: 2NZ15" 
-          value=""
+          value="2NZ15"
         >
       </div>
 
       <div class="input-group">
-        <label for="output-count">生成回数 (1-10)を指定してください。</label>
+        <label for="output-count">シャッフル回数 (1-10)</label>
         <input 
           type="number" 
           id="output-count" 
@@ -251,7 +270,7 @@
         >
       </div>
 
-      <button onclick="handleShuffle()">結果を生成</button>
+      <button onclick="handleShuffle()">シャッフルを実行</button>
     </div>
 
     <div id="result" class="result-container"></div>
@@ -324,50 +343,52 @@
       const resultDiv = document.getElementById("result");
       resultDiv.innerHTML = shuffledResults.map((result, index) => `
         <div class="result-card">
-          <h3 class="result-title">生成結果 ${index + 1}</h3>
+          <h3 class="result-title">シャッフル結果 ${index + 1}</h3>
           
-          <div class="deck-section">
-            <h4 class="deck-title">メインデッキ (7枚)</h4>
-            <div class="card-grid">
-              ${result.mainDeck.map((card, i) => `
-                <div class="card-item">
-                  <div class="card-image">
-                    <img 
-                      src="images/${card.img.replace(/\\/g, '/')}" 
-                      alt="${card.name}"
-                      loading="lazy"
-                      onerror="this.src='images/Back_side.png'"
-                    >
+          <div class="deck-sections-container">
+            <div class="deck-section main-deck">
+              <h4 class="deck-title">メインデッキ (7枚)</h4>
+              <div class="card-grid">
+                ${result.mainDeck.map((card, i) => `
+                  <div class="card-item">
+                    <div class="card-image">
+                      <img 
+                        src="images/${card.img.replace(/\\/g, '/')}" 
+                        alt="${card.name}"
+                        loading="lazy"
+                        onerror="this.src='images/Back_side.png'"
+                      >
+                    </div>
+                    <div class="card-details">
+                      <span class="card-number">${i + 1}.</span>
+                      <span class="card-name">${card.name}</span>
+                      <span class="card-id">(${card.card_number})</span>
+                    </div>
                   </div>
-                  <div class="card-details">
-                    <span class="card-number">${i + 1}.</span>
-                    <span class="card-name">${card.name}</span>
-                    <span class="card-id">(${card.card_number})</span>
-                  </div>
-                </div>
-              `).join('')}
+                `).join('')}
+              </div>
             </div>
-          </div>
 
-          <div class="deck-section">
-            <h4 class="deck-title">エールデッキデッキ (1枚)</h4>
-            <div class="card-grid">
-              ${result.subDeck.map(card => `
-                <div class="card-item">
-                  <div class="card-image">
-                    <img 
-                      src="images/${card.img.replace(/\\/g, '/')}" 
-                      alt="${card.name}"
-                      loading="lazy"
-                      onerror="this.src='images/Back_side.png'"
-                    >
+            <div class="deck-section sub-deck">
+              <h4 class="deck-title">サブデッキ (1枚)</h4>
+              <div class="card-grid">
+                ${result.subDeck.map(card => `
+                  <div class="card-item">
+                    <div class="card-image">
+                      <img 
+                        src="images/${card.img.replace(/\\/g, '/')}" 
+                        alt="${card.name}"
+                        loading="lazy"
+                        onerror="this.src='images/Back_side.png'"
+                      >
+                    </div>
+                    <div class="card-details">
+                      <span class="card-name">${card.name}</span>
+                      <span class="card-id">(${card.card_number})</span>
+                    </div>
                   </div>
-                  <div class="card-details">
-                    <span class="card-name">${card.name}</span>
-                    <span class="card-id">(${card.card_number})</span>
-                  </div>
-                </div>
-              `).join('')}
+                `).join('')}
+              </div>
             </div>
           </div>
         </div>
