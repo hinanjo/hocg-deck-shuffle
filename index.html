@@ -394,19 +394,27 @@
         const text = `【初手ジェネレーター】\nmade by ホロカ情報局（@holoca11）\n\n#ホロカ #ホロ活`;
         
         // URLはウェブサイトのベースURLを使用
-        const baseUrl = '\nhttps://hinanjo.github.io/hocg-deck-shuffle/';
+        const baseUrl = 'https://hinanjo.github.io/hocg-deck-shuffle/';
+        
+        // モバイルデバイスかどうかの判定
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         
         // エンコードされたパラメータを使用してURLを構築
         const tweetUrl = new URL('https://twitter.com/intent/tweet');
-        tweetUrl.searchParams.append('text', text);
+        tweetUrl.searchParams.append('text', text + '\n');  // 末尾に改行を追加
         tweetUrl.searchParams.append('url', baseUrl);
-        
-        // ポップアップウィンドウを開く
-        window.open(
-          tweetUrl.toString(),
-          '_blank',
-          'width=550,height=420,menubar=no,toolbar=no,scrollbars=yes'
-        );
+    
+        if (isMobile) {
+          // モバイルの場合は直接リンクを開く
+          window.location.href = tweetUrl.toString();
+        } else {
+          // PCの場合はポップアップウィンドウを開く
+          window.open(
+            tweetUrl.toString(),
+            '_blank',
+            'width=550,height=420,menubar=no,toolbar=no,scrollbars=yes'
+          );
+        }
       } catch (error) {
         console.error('Error sharing to Twitter:', error);
         alert('Xの投稿画面を開けませんでした。\nエラー: ' + error.message);
