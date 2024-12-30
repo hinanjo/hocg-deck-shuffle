@@ -54,6 +54,8 @@
       padding: 1.5rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       margin-bottom: 2rem;
+      max-width: 1200px;
+      margin: 0 auto 2rem;
     }
 
     .input-group {
@@ -113,6 +115,8 @@
     .result-container {
       display: grid;
       gap: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .result-card {
@@ -121,6 +125,8 @@
       padding: 1.5rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       border-left: 4px solid var(--primary-color);
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .result-title {
@@ -131,15 +137,14 @@
     }
 
     .deck-section {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, 180px);
-      gap: 1rem;
-      max-width: 1200px;
-      margin: 0;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
     }
 
     .card-item {
@@ -151,8 +156,6 @@
       padding: 0.5rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 180px;
-      margin: 0;
     }
 
     .card-image {
@@ -190,6 +193,7 @@
       font-weight: 500;
       display: block;
       margin: 0.25rem 0;
+      font-size: 0.9rem;
     }
 
     .card-id {
@@ -215,15 +219,28 @@
     @media (max-width: 768px) {
       .container {
         margin: 1rem auto;
+        padding: 0 0.5rem;
       }
 
       .card-grid {
-        grid-template-columns: repeat(auto-fill, 140px);
+        grid-template-columns: repeat(4, 1fr);
       }
 
-      .card-item {
-        max-width: 140px;
+      .card-name {
+        font-size: 0.8rem;
       }
+
+      .card-id {
+        font-size: 0.7rem;
+      }
+    }
+
+    .capture-area {
+      position: fixed;
+      left: -9999px;
+      width: 1200px;
+      background-color: var(--background-color);
+      padding: 20px;
     }
   </style>
 </head>
@@ -235,7 +252,7 @@
 
     <div class="input-card">
       <div class="input-group">
-        <label for="deck-id">デッキコード（<B>12月20日より前にDeck-Logに登録されたデッキは正しく表示されません。</B>）</label>
+        <label for="deck-id">デッキコード（<b>12月20日より前にDeck-Logに登録されたデッキは正しく表示されません。</b>）</label>
         <input 
           type="text" 
           id="deck-id" 
@@ -330,13 +347,42 @@
         const button = resultElement.querySelector('.screenshot-button');
         button.style.display = 'none';
 
-        const canvas = await html2canvas(resultElement, {
-          backgroundColor: '#F7F9FC',
-          scale: 2,
+        // キャプチャ用のラッパー要素を作成
+        const wrapper = document.createElement('div');
+        wrapper.className = 'capture-area';
+        
+        // 結果要素をクローン
+        const clone = resultElement.cloneNode(true);
+        
+        // 不要な要素を削除
+        const cloneButton = clone.querySelector('.screenshot-button');
+        if (cloneButton) cloneButton.remove();
+
+        // カードグリッドのスタイルを調整
+        const cardGrid = clone.querySelector('.card-grid');
+        if (cardGrid) {
+          cardGrid.style.display = 'grid';
+          cardGrid.style.gridTemplateColumns = 'repeat(8, 1fr)';
+          cardGrid.style.gap = '10px';
+          cardGrid.style.width = '100%';
+        }
+
+        wrapper.appendChild(clone);
+        document.body.appendChild(wrapper);
+
+        // キャプチャ
+        const canvas = await html2canvas(wrapper, {
+          width: 1200,
+          height: 628,
+          scale: 1,
           useCORS: true,
-          logging: false
+          logging: false,
+          backgroundColor: '#F7F9FC'
         });
 
+        // 一時要素を削除
+        document.body.removeChild(wrapper);
+        
         // ボタンを再表示
         button.style.display = 'block';
 
@@ -344,7 +390,7 @@
         const link = document.createElement('a');
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         link.download = `shuffle-result-${timestamp}.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.href = canvas.toDataURL('image/png', 0.9);
         link.click();
       } catch (error) {
         console.error('Error capturing result:', error);
@@ -387,7 +433,7 @@
                     >
                   </div>
                   <div class="card-details">
-                    <span class="card-number">サブデッキ</span>
+                  　<span class="card-number">エールデッキ</span>
                     <span class="card-name">${card.name}</span>
                     <span class="card-id">(${card.card_number})</span>
                   </div>
@@ -396,7 +442,7 @@
             </div>
           </div>
           <button onclick="captureResult(this.parentElement)" class="screenshot-button">
-            結果を画像で保存
+            画像を保存
           </button>
         </div>
       `).join('');
