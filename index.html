@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>hololive Official Card Game初手ジェネレーター</title>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
     :root {
       --primary-color: #4A90E2;
@@ -14,6 +15,7 @@
       --border-color: #E1E4E8;
       --success-color: #28a745;
       --error-color: #dc3545;
+      --success-hover: #218838;
     }
 
     * {
@@ -82,7 +84,6 @@
     button {
       width: 100%;
       padding: 1rem;
-      background-color: var(--primary-color);
       color: white;
       border: none;
       border-radius: 8px;
@@ -92,8 +93,21 @@
       transition: background-color 0.3s ease;
     }
 
-    button:hover {
+    .shuffle-button {
+      background-color: var(--primary-color);
+    }
+
+    .shuffle-button:hover {
       background-color: var(--primary-hover);
+    }
+
+    .screenshot-button {
+      margin-top: 1rem;
+      background-color: var(--success-color);
+    }
+
+    .screenshot-button:hover {
+      background-color: var(--success-hover);
     }
 
     .result-container {
@@ -118,16 +132,6 @@
 
     .deck-section {
       margin-bottom: 1.5rem;
-    }
-
-    .deck-section:last-child {
-      margin-bottom: 0;
-    }
-
-    .deck-title {
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--text-color);
     }
 
     .card-grid {
@@ -236,7 +240,7 @@
           type="text" 
           id="deck-id" 
           placeholder="例: 2NZ15" 
-          value=""
+          value="2NZ15"
         >
       </div>
 
@@ -251,7 +255,7 @@
         >
       </div>
 
-      <button onclick="handleShuffle()">シャッフルを実行</button>
+      <button onclick="handleShuffle()" class="shuffle-button">シャッフルを実行</button>
     </div>
 
     <div id="result" class="result-container"></div>
@@ -320,6 +324,34 @@
       return shuffled;
     }
 
+    async function captureResult(resultElement) {
+      try {
+        // ボタンを一時的に非表示
+        const button = resultElement.querySelector('.screenshot-button');
+        button.style.display = 'none';
+
+        const canvas = await html2canvas(resultElement, {
+          backgroundColor: '#F7F9FC',
+          scale: 2,
+          useCORS: true,
+          logging: false
+        });
+
+        // ボタンを再表示
+        button.style.display = 'block';
+
+        // 画像をダウンロード
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        link.download = `shuffle-result-${timestamp}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (error) {
+        console.error('Error capturing result:', error);
+        alert('画像の生成に失敗しました。');
+      }
+    }
+
     function displayResults(shuffledResults) {
       const resultDiv = document.getElementById("result");
       resultDiv.innerHTML = shuffledResults.map((result, index) => `
@@ -355,7 +387,7 @@
                     >
                   </div>
                   <div class="card-details">
-                  　<span class="card-number">エールデッキ</span>
+                    <span class="card-number">サブデッキ</span>
                     <span class="card-name">${card.name}</span>
                     <span class="card-id">(${card.card_number})</span>
                   </div>
@@ -363,6 +395,9 @@
               `).join('')}
             </div>
           </div>
+          <button onclick="captureResult(this.parentElement)" class="screenshot-button">
+            画像を保存
+          </button>
         </div>
       `).join('');
     }
