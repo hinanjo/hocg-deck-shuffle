@@ -384,16 +384,28 @@
         .slice(0, 7)
         .map((el, i) => `${i + 1}. ${el.textContent}`);
       const subDeckCard = resultElement.querySelector('.card-name:last-child').textContent;
-
-      const text = `デッキシャッフル結果:
-メインデッキ:
-${mainDeckCards.join('\n')}
-サブデッキ: ${subDeckCard}
-#ホロカード`;
-
-      const url = encodeURIComponent(window.location.href);
+    
+      // デッキIDを取得
+      const deckId = document.getElementById("deck-id").value.trim();
+    
+      const text = `【初手シャッフル結果】
+    デッキコード: ${deckId}
+    #ホロカード #ホロカードシャッフル`;
+    
+      // URLエンコーディングを確実に行う
       const encodedText = encodeURIComponent(text);
-      window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${url}`, '_blank');
+      const encodedUrl = encodeURIComponent('https://hinanjo.github.io/');
+    
+      // Web Intent URLを構築
+      const intentUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+      
+      try {
+        // 新しいウィンドウでXの投稿画面を開く
+        window.open(intentUrl, '_blank');
+      } catch (error) {
+        console.error('Error opening Twitter intent:', error);
+        alert('Xの投稿画面を開けませんでした。');
+      }
     }
 
     async function captureResult(resultElement) {
