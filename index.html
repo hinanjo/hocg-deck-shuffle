@@ -393,16 +393,16 @@
       
       // 投稿テキストを構築
       const text = `【初手シャッフル結果】
-    メインデッキ：
-    ${mainDeckCards}
-    サブデッキ：${subDeckCard}
-    デッキコード: ${deckId}
-    #ホロカード #ホロカードシャッフル`;
-    
+メインデッキ：
+${mainDeckCards}
+サブデッキ：${subDeckCard}
+デッキコード: ${deckId}
+#ホロカード #ホロカードシャッフル`;
+
       // URLエンコーディング
       const encodedText = encodeURIComponent(text);
       const encodedUrl = encodeURIComponent(window.location.href);
-    
+
       // Web Intent URLを構築
       const intentUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
       
@@ -422,7 +422,7 @@
         'scrollbars=1',
         'resizable=1'
       ].join(',');
-    
+
       try {
         window.open(intentUrl, 'twitter', options);
       } catch (error) {
