@@ -379,55 +379,40 @@
       return shuffled;
     }
 
+    function shuffleCards(cards) {
+      const shuffled = [...cards];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
     function shareToTwitter(resultElement) {
-      // メインデッキとサブデッキのカード情報を取得
-      const mainDeckCards = Array.from(resultElement.querySelectorAll('.card-name'))
-        .slice(0, 7)
-        .map((el, i) => `${i + 1}. ${el.textContent}`)
-        .join('\n');
-      
-      const subDeckCard = resultElement.querySelector('.card-name:last-child').textContent;
-      
-      // デッキIDを取得
-      const deckId = document.getElementById("deck-id").value.trim();
-      
-      // 投稿テキストを構築
-      const text = `【初手シャッフル結果】
-メインデッキ：
-${mainDeckCards}
-サブデッキ：${subDeckCard}
-デッキコード: ${deckId}
-#ホロカード #ホロカードシャッフル`;
-
-      // URLエンコーディング
-      const encodedText = encodeURIComponent(text);
-      const encodedUrl = encodeURIComponent(window.location.href);
-
-      // Web Intent URLを構築
-      const intentUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
-      
-      // 新しいウィンドウでXの投稿画面を開く
-      const width = 550;
-      const height = 420;
-      const left = Math.floor((window.screen.width - width) / 2);
-      const top = Math.floor((window.screen.height - height) / 2);
-      
-      const options = [
-        'width=' + width,
-        'height=' + height,
-        'left=' + left,
-        'top=' + top,
-        'personalbar=0',
-        'toolbar=0',
-        'scrollbars=1',
-        'resizable=1'
-      ].join(',');
-
       try {
-        window.open(intentUrl, 'twitter', options);
+        // デッキIDを取得
+        const deckId = document.getElementById("deck-id").value.trim();
+        
+        // シンプルな投稿テキストを構築
+        const text = `【初手シャッフル結果】\nデッキコード: ${deckId}\n#ホロカード #ホロカードシャッフル`;
+        
+        // URLはウェブサイトのベースURLを使用
+        const baseUrl = 'https://hinanjo.github.io/';
+        
+        // エンコードされたパラメータを使用してURLを構築
+        const tweetUrl = new URL('https://twitter.com/intent/tweet');
+        tweetUrl.searchParams.append('text', text);
+        tweetUrl.searchParams.append('url', baseUrl);
+        
+        // ポップアップウィンドウを開く
+        window.open(
+          tweetUrl.toString(),
+          '_blank',
+          'width=550,height=420,menubar=no,toolbar=no,scrollbars=yes'
+        );
       } catch (error) {
-        console.error('Error opening Twitter intent:', error);
-        alert('Xの投稿画面を開けませんでした。');
+        console.error('Error sharing to Twitter:', error);
+        alert('Xの投稿画面を開けませんでした。\nエラー: ' + error.message);
       }
     }
 
