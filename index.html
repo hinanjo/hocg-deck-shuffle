@@ -389,12 +389,10 @@
     }
 
     function shareToTwitter(resultElement) {
-      try {
-        // デッキIDを取得
-        const deckId = document.getElementById("deck-id").value.trim();
-        
+      try {        
         // シンプルな投稿テキストを構築
-        const text = `【初手シャッフル結果】\nデッキコード: ${deckId}\n#ホロカード #ホロカードシャッフル`;
+        const text = `【初手を生成】
+        #ホロカ #ホロ活`;
         
         // URLはウェブサイトのベースURLを使用
         const baseUrl = 'https://hinanjo.github.io/';
